@@ -5,18 +5,18 @@ function shell(command, callback){
 
 document.addEventListener("DOMContentLoaded", function(event) {
     var fs=require('fs');
-    
-    var contents = fs.readFileSync('COMP/algorithme', 'utf8');
+    var instances = M.AutoInit();
+    var contents = fs.readFileSync('COMP/entree.txt', 'utf8');
     var alg=document.getElementById("alg");    
     alg.innerHTML=contents;
 
     
-    var contents = fs.readFileSync('COMP/lexical.l', 'utf8');
+    var contents = fs.readFileSync('COMP/Lexique.l', 'utf8');
     var alg=document.getElementById("lex");    
     alg.innerHTML=contents;
 
         
-    var contents = fs.readFileSync('COMP/syntaxique.y', 'utf8');
+    var contents = fs.readFileSync('COMP/Syntaxe.y', 'utf8');
     var alg=document.getElementById("synt");    
     alg.innerHTML=contents;
 
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     save.onclick=function(){
         var alg=document.getElementById("alg"); 
         console.log("contenu : "+alg.value);
-        fs.writeFile("COMP/algorithme", String(alg.value) ,function(err) {
+        fs.writeFile("COMP/entree.txt", String(alg.value) ,function(err) {
             if(err) {
                 return console.log(err);
             }
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         }); 
 
         var synt=document.getElementById("synt"); 
-        fs.writeFile("COMP/syntaxique.y", String(synt.value) ,function(err) {
+        fs.writeFile("COMP/Syntaxe.y", String(synt.value) ,function(err) {
             if(err) {
                 return console.log(err);
             }
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         }); 
 
         var lex=document.getElementById("lex"); 
-        fs.writeFile("COMP/lexical.l", String(lex.value) ,function(err) {
+        fs.writeFile("COMP/Lexique.l", String(lex.value) ,function(err) {
             if(err) {
                 return console.log(err);
             }
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     var compile=document.getElementById("compile");
     compile.onclick=function(){
             console.log("Compiling.");
-         shell("cd COMP && flex lexical.l && bison -d syntaxique.y && gcc lex.yy.c syntaxique.tab.c -lfl -ly -o analyseur && cd ..",function(output){
+         shell("cd COMP && flex Lexique.l && bison -d Syntaxe.y && gcc lex.yy.c Syntaxe.tab.c -lfl -ly -o analyseur && cd ..",function(output){
             var result=document.getElementById("result");
             result.innerHTML=result.innerHTML+'<br/>==>'+output;
          });
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     var execute=document.getElementById("execute");
     execute.onclick=function(){
         console.log("Executing.");
-     shell("cd COMP && flex lexical.l && bison -d syntaxique.y && gcc lex.yy.c syntaxique.tab.c -lfl -ly -o analyseur && ./analyseur<<algorithme && cd ..",function(output){
+     shell("cd COMP && flex Lexique.l && bison -d Syntaxe.y && gcc lex.yy.c Syntaxe.tab.c -lfl -ly -o analyseur && ./analyseur<<entree.txt && cd ..",function(output){
         var result=document.getElementById("result");
         result.innerHTML=result.innerHTML+'<br/>==>'+output;
      });

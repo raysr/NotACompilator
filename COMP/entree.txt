@@ -1,0 +1,14 @@
+#BOUCLE
+ALGORITHME test
+{
+l||k||m INT;
+n||o REAL;
+T[5] INT;
+
+o := m;
+EXECUT 
+l := 4;
+ IF( k == 5 )
+
+
+}

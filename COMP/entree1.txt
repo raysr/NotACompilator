@@ -1,0 +1,16 @@
+ALGORITHME test
+VAR
+l|k|m:INT;
+n|o:REAL;
+p:STRING;
+T[5] :INT;
+DEBUT
+m<--28000000;
+k<--5;
+FAIRE 
+l<--4;
+ SI(k==5)
+
+
+
+FIN

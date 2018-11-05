@@ -8,7 +8,7 @@ const { app, BrowserWindow } = require('electron')
     win.loadFile('UI/index.html')
   
     // Ouvre les DevTools.
-    win.webContents.openDevTools()
+   // win.webContents.openDevTools()
     win.title="Compilator"
     win.on('closed', () => {
       win = null
