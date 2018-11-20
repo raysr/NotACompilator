@@ -130,61 +130,11 @@ int retournerTaille(char nom[])
 int yyerror(char *s) 
 {
   printf("\n            Erreur Syntaxique !!!!   a la ligne: %d      |     colonne :%d  \n", nbrligne,nbrcolonne);
+    return 1;
 }
 
 
 
-typedef struct qdr{
-
-    char oper[100]; 
-    char op1[100];   
-    char op2[100];   
-    char res[100];  
-    
-  }qdr;
-  qdr quad[1000];
-
-
-
-
-
-void quadr(char opr[],char op1[],char op2[],char res[])
-{
-
-	strcpy(quad[qc].oper,opr);
-	strcpy(quad[qc].op1,op1);
-	strcpy(quad[qc].op2,op2);
-	strcpy(quad[qc].res,res);
-	
-	
-qc++;
-
-}
-
-void ajour_quad(int num_quad, int colon_quad, char val [])
-{
-if (colon_quad==0) strcpy(quad[num_quad].oper,val);
-else if (colon_quad==1) strcpy(quad[num_quad].op1,val);
-         else if (colon_quad==2) strcpy(quad[num_quad].op2,val);
-                   else if (colon_quad==3) strcpy(quad[num_quad].res,val);
-
-}
-
-void afficher_qdr()
-{
-printf("\n\n");
-printf("\n*************************************Les Quadruplets***********************************\n");
-printf("\n|--------------------------------------------------------------------------------------|");
-
-int i;
-
-for(i=0;i<qc;i++)
-		{
-
- printf("\n %d - ( %s  ,  %s  ,  %s  ,  %s )",i,quad[i].oper,quad[i].op1,quad[i].op2,quad[i].res); 
- printf("\n---------------------------------------------------------------------------------------\n");
-}
-}
 
 
 %}
@@ -194,70 +144,62 @@ Chiffre [1-9][0-9]*|0
 Sep [_]
 cst [1-9][0-9]*|0
 CONST_ENT [+-]?{Chiffre}
-CONST_REAL [+-]?{Chiffre}[.]{Chiffre}+
+CONST_REAL [+-]?{Chiffre}[,]{Chiffre}+
 Taille [1-9][0-9]*
 Symbole {.}*
 Comment1 "//"
 Comment2 "/*"
 String ["][A-Za-z ]+["]
-%x IN_COMMENT
+%x IN_COMMENT1
 %%
 
 
-"/*"            {	BEGIN(IN_COMMENT);    	}
+"//"            {	BEGIN(IN_COMMENT1);    	}
 
- <IN_COMMENT>{
-				 "*/"      {BEGIN(INITIAL);}	// finish the comment
+ <IN_COMMENT1>{
+				 "//"      {BEGIN(INITIAL);}	// finish the comment
 				 [^\n]+    					// eat comment
 				 \n                         {nbrcolonne=1; nbrligne++;}
 				 [^\n]+
 				 \/       					// eat the lone /
 }
 
-{CONST_ENT}           {yylval.entier=atoi(yytext); entite++;return CONST_ENT;           }
-{CONST_REAL}          {yylval.reel=atoi(yytext); entite++;return CONST_REAL;           }
-":="                 {insert(yytext, "affectation" ,nbrligne,nbrcolonne,1,0,""); entite++;return AFF;             }
-[\[\]();{}]          {insert(yytext, "separateur" ,nbrligne,nbrcolonne,1,0,""); entite++;return yytext[0];        }
-"||"                   {insert(yytext, "separateur" ,nbrligne,nbrcolonne,1,0,""); entite++;return SEP;             }
+{CONST_ENT}           {yylval.entier=atoi(yytext);nbrcolonne=nbrcolonne+yyleng; entite++;return CONST_ENT;           }
+{CONST_REAL}          {yylval.reel=atoi(yytext);nbrcolonne=nbrcolonne+yyleng; entite++;return CONST_REAL;           }
+
+[\[\]();{}]          {nbrcolonne=nbrcolonne+yyleng; entite++;return yytext[0];        }
+"||"                   {nbrcolonne=nbrcolonne+yyleng; entite++;return SEP;             }
 [\n]                  {nbrligne++; nbrcolonne=1;                                                              }
 [ ]+                  {nbrcolonne=nbrcolonne+yyleng;                                                          }
 [\t]+                 {nbrcolonne=nbrcolonne+(yyleng*8);                                                      }
-"<"                   {insert(yytext, "operateur" ,nbrligne,nbrcolonne,1,0,""); entite++;return OPREL;             }
-">"                   {insert(yytext, "operateur" ,nbrligne,nbrcolonne,1,0,""); entite++;return OPREL;             }
-"<="                  {insert(yytext, "operateur" ,nbrligne,nbrcolonne,1,0,""); entite++;return OPREL;             }
-">="                  {insert(yytext, "operateur" ,nbrligne,nbrcolonne,1,0,""); entite++;return OPREL;             }
-"!="                  {insert(yytext, "operateur" ,nbrligne,nbrcolonne,1,0,""); entite++;return OPREL;             }
-"=="                  {insert(yytext, "operateur" ,nbrligne,nbrcolonne,1,0,""); entite++;return OPREL;             }
-"+"                   {insert(yytext, "addition" ,nbrligne,nbrcolonne,1,0,""); entite++;return PLUS;               }
-"-"                   {insert(yytext, "soustraction" ,nbrligne,nbrcolonne,1,0,""); entite++;return SUST;           }
-"*"                   {insert(yytext, "multiplication" ,nbrligne,nbrcolonne,1,0,""); entite++;return MULT;         }
-"/"                   {insert(yytext, "division" ,nbrligne,nbrcolonne,1,0,""); entite++;return DIV;                }
-
-ALGORITHME            {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Algo;            }
-IF                    {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_If;               }
-EXECUT                 {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Execut;            }
-While                  {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_while;             }
-
-#TAB                    {yylval.str=strdup(yytext); insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return bibl_tab;}
-#BOUCLE                 {yylval.str=strdup(yytext); insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return bibl_boucle;}
-#Calcul                 {yylval.str=strdup(yytext); insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return bibl_calcul;}
+"<"                   {nbrcolonne=nbrcolonne+yyleng; entite++;yylval.str=strdup(yytext);return OPREL;             }
+">"                   {nbrcolonne=nbrcolonne+yyleng; entite++;yylval.str=strdup(yytext);return OPREL;             }
+"<="                  {nbrcolonne=nbrcolonne+yyleng; entite++;yylval.str=strdup(yytext); return OPREL;            }
+">="                  {nbrcolonne=nbrcolonne+yyleng; entite++; yylval.str=strdup(yytext); return OPREL;           }
+"!="                  {nbrcolonne=nbrcolonne+yyleng; entite++;yylval.str=strdup(yytext);  return OPREL;           }
+"=="                  {nbrcolonne=nbrcolonne+yyleng; entite++;yylval.str=strdup(yytext);  return OPREL;           }
+":="                 {nbrcolonne=nbrcolonne+yyleng; entite++;return AFF;             }
+"+"                   {nbrcolonne=nbrcolonne+yyleng; entite++;return PLUS;               }
+"-"                   {nbrcolonne=nbrcolonne+yyleng; entite++;return SUST;           }
+"*"                   {nbrcolonne=nbrcolonne+yyleng; entite++;return MULT;         }
+"/"                   {nbrcolonne=nbrcolonne+yyleng; entite++;return DIV;                }
+ALGORITHME            {nbrcolonne=nbrcolonne+yyleng; entite++;return mc_Algo;            }
+CONST               {yylval.str=strdup(yytext); nbrcolonne=nbrcolonne+yyleng; entite++;return mc_CONST;              }
+Integer               {yylval.str=strdup(yytext); nbrcolonne=nbrcolonne+yyleng; entite++;return mc_INT;              }
+Real                  {yylval.str=strdup(yytext); nbrcolonne=nbrcolonne+yyleng; entite++;return mc_REAL;             }
 
 
 
-DEBUT                 {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Deb;              }
-FIN                   {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Fin;              }
-SI                    {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Si;               }
-FAIRE                 {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Faire;            }
-FAIT                  {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Fait;             }
-POUR                  {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Pour;             }
-JUSQUE                {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Jusque;           }
-VAR                   {insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_Var;              }
-INT                   {yylval.str=strdup(yytext); insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_INT;              }
-REAL                  {yylval.str=strdup(yytext); insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_REAL;             }
-STRING                {yylval.str=strdup(yytext); insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_STRING;           }
-CHAR                  {yylval.str=strdup(yytext); insert(yytext, "Mot cle" ,nbrligne,nbrcolonne,1,0,""); entite++;return mc_CHAR;             }
+IF                    {nbrcolonne=nbrcolonne+yyleng; entite++;return mc_If;               }
+EXECUT                 {nbrcolonne=nbrcolonne+yyleng; entite++;return mc_Execut;            }
+While                  {nbrcolonne=nbrcolonne+yyleng; entite++;return mc_while;             }
+
+#TAB\n                    {yylval.str=strdup(yytext); insert("#TAB", "Bibliotheque" ,nbrligne,nbrcolonne,1,0,"");nbrcolonne=nbrcolonne+yyleng; entite++;return bibl_tab;}
+#BOUCLE[ \t]*\n                 {yylval.str=strdup(yytext); insert("#BOUCLE", "Bibliotheque" ,nbrligne,nbrcolonne,1,0,"");nbrcolonne=nbrcolonne+yyleng; entite++;return bibl_boucle;}
+#Calcul[ \t]*\n                 {yylval.str=strdup(yytext); insert("#Calcul", "Bibliotheque" ,nbrligne,nbrcolonne,1,0,"");nbrcolonne=nbrcolonne+yyleng; entite++;return bibl_calcul;}
+
 {IDF} {if(yyleng<=12) {yylval.str=strdup(yytext);
-                       insert(yytext, "Identificateur" ,nbrligne,nbrcolonne,0,1000,""); entite++; return IDF;}
+                       insert(yytext, "Identificateur" ,nbrligne,nbrcolonne,0,1000,"");nbrcolonne=nbrcolonne+yyleng; entite++; return IDF;}
 	   else {printf("\n| %-14s | Erreur 'idf >12'| %10d | %10d | %10d |" ,yytext,nbrligne,nbrcolonne,0,0,"");
                      printf("\n|----------------|-----------------|------------|------------|------------|------------|------------|");}
 	  };
