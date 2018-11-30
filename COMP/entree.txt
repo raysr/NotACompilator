@@ -4,11 +4,8 @@ Integer l||k||m ;
 Real n ||o;
 Integer T[5]|| N[7]; 
 {
-EXECUT 
-l:=4+m*9/2;
-IF(l==5)
-EXECUT 
-l:=4+m*9/2;
+EXECUT
+k[4]:=l/k*m/T[4]*4*5+m;
 IF(l==5)
 While (l!=3)
 {

@@ -1,16 +1,24 @@
 ALGORITHME test
-VAR
-l|k|m:INT;
-n|o:REAL;
-p:STRING;
-T[5] :INT;
-DEBUT
-m<--28000000;
-k<--5;
-FAIRE 
-l<--4;
- SI(k==5)
-
-
-
-FIN
+Integer p;
+Integer l||k||m ;
+Real n ||o;
+Integer T[5]|| N[7]; 
+{
+EXECUT 
+l:=4+m*9/2;
+IF(l==5)
+EXECUT 
+l:=4+m*9/2;
+IF(l==5)
+While (l!=3)
+{
+l:=2;
+EXECUT 
+l:=4+m*9/2;
+IF(l==5)
+While (l!=3)
+{
+l:=2;
+}
+}
+}

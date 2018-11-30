@@ -6,9 +6,11 @@
 FILE* yyin;
 int yylex();
 typedef int bool;
-char tmp[20],tmp2[20],tmp3[20],tmp5[20],tmp4[20],tmp6[20],tmp7[20],tmp8[20],tmp9[20];
+char tmp[20],tmp2[20],tmp3[20],tmp5[20],tmp4[20],tmp6[20],tmp7[20],tmp8[20],tmp9[20],tmp10[20];
 int sauv_cond=0,sauv_inst=0,sauv_fin;
-int t=0; // Compteur des états temporaires
+extern int t; // Compteur des états temporaires
+int l=1,n=0; // Compteurs pour les bounds
+int op_count=0; // Compteur du nombre d'operandes pour chaque operation
 enum { false, true };
 	extern int found(char nom[]);
 	extern void insert(char nom[], char code[],int nbrl,int nbrc,int taille,int val, char type[]);
@@ -72,7 +74,7 @@ IDF_Plus_Tab:IDF '[' CONST_ENT ']' SEP IDF_Plus_Tab
 	    
 			     if($3 <=0){printf("\nErreur Semantique: taille de %s est negative ou nulle , a la ligne %d\n", $1, nbrligne);}
 				 else{ insereTaille($1,$3);}
-			    if ( doubleDeclaration($1)==1){insereType($1,sauvType);
+			    if ( doubleDeclaration($1)==1){insereType($1,sauvType);sprintf(tmp10,"L%d",l);sprintf(tmp9,"%d",$3);quadr("BOUNDS",tmp10,tmp9,"");quadr("ADEC",$1,"","");
                          } else {printf("\nErreur Semantique: double declation de %s, a la ligne %d\n", $1, nbrligne);}
 						 }
           | IDF '[' CONST_ENT ']'
@@ -80,7 +82,7 @@ IDF_Plus_Tab:IDF '[' CONST_ENT ']' SEP IDF_Plus_Tab
 	    
 			     if($3 <=0){printf("\nErreur Semantique: taille de %s est negative ou nulle , a la ligne %d\n", $1, nbrligne);}
 				 else{ insereTaille($1,$3);}
-			    if ( doubleDeclaration($1)==1){insereType($1,sauvType);
+			    if ( doubleDeclaration($1)==1){insereType($1,sauvType);insereType($1,sauvType);sprintf(tmp10,"L%d",l);sprintf(tmp9,"%d",$3);quadr("BOUNDS",tmp10,tmp9,"");quadr("ADEC",$1,"","");
                          } else {printf("\nErreur Semantique: double declation de %s, a la ligne %d\n", $1, nbrligne);}
 						 }
 ;
@@ -100,7 +102,7 @@ INST_Boucle:  mc_while'(' C COND_WHILE ')'
             { if(found("#BOUCLE")!=-1){printf("\nErreur Semantique: la bibliotheque Tab est manquante , a la ligne %d.\n", nbrligne);}
 				}			 
 ;
-C: {printf("TAILLE : %d \n",taille+1);addr_while[dixit_while]=taille+1;dixit_while++;}
+C: {addr_while[dixit_while]=taille+1;dixit_while++;}
 ;
 D:{sprintf(tmp,"Quadr N°%d",taille+2);ajour_quad(addr_while[dixit_while-1],2,tmp);sprintf(tmp,"Quadr N°%d",addr_while[dixit_while-1]);dixit_while--;quadr("BR",tmp,"","");}
 ;
@@ -124,7 +126,7 @@ COND_IF: IDF OPREL IDF   {if(strcmp($2,"==")==0){strcpy(tmp,"BE");}if (strcmp($2
 
 
 // ------------------- Instruction ------------------
-INST: INST_Aff 
+INST: EPIC INST_Aff 
      | INST_Cond
 	 | INST_Boucle 
 ;
@@ -136,30 +138,37 @@ INST_Aff:
 		 |IDF AFF CONST_ENT ';'{sprintf(tmp2,"%d",t);quadr(":=",tmp2,"",$1);}
 		 |IDF AFF IDF ';'		 {quadr(":=",$3,"",$1);}
 		 |IDF AFF CONST_REAL ';'{sprintf(tmp2,"%f",$3);quadr(":=",tmp2,"",$1);}
-		 |IDF '[' CONST_ENT ']' AFF expres ';'{quadr(":=","","",$1);}
-		 |IDF '[' CONST_ENT ']' AFF CONST_ENT ';'{sprintf(tmp2,"%d",$6);quadr(":=",tmp2,"",$1);}
-		 |IDF '[' CONST_ENT ']' AFF CONST_REAL ';'{sprintf(tmp2,"%f",$6);quadr(":=",tmp2,"",$1);}
-		 |IDF '[' CONST_ENT ']' AFF IDF ';'		 {quadr(":=",$6,"",$1);}
-
+		 |IDF '[' CONST_ENT ']' AFF expres ';'{sprintf(tmp2,"T%d",t-1);sprintf(tmp10,"%s[%d]",$1,$3);quadr(":=",tmp2,"",tmp10);}
+		 |IDF '[' CONST_ENT ']' AFF CONST_ENT ';'{sprintf(tmp2,"%d",$6);sprintf(tmp10,"%s[%d]",$1,$3);quadr(":=",tmp2,"",tmp10);}
+		 |IDF '[' CONST_ENT ']' AFF CONST_REAL ';'{sprintf(tmp2,"%f",$6);sprintf(tmp10,"%s[%d]",$1,$3);quadr(":=",tmp2,"",tmp10);}
+		 |IDF '[' CONST_ENT ']' AFF IDF ';'		 {sprintf(tmp10,"%s[%d]",$1,$3);quadr(":=",$6,"",tmp10);}
+;
+EPIC: {op_count=taille+1;}
 ;
 expres: CONST_ENT PLUS prod {sprintf(tmp3,"T%d",t);sprintf(tmp5,"%d",$1);quadr("+",tmp5,tmp4,tmp3);t++;}
 		| CONST_REAL PLUS prod {sprintf(tmp3,"T%d",t);sprintf(tmp5,"%f",$1);quadr("+",tmp5,tmp4,tmp3);t++;}
 		| IDF PLUS prod  {sprintf(tmp3,"T%d",t);quadr("+",$1,tmp4,tmp3);t++;}
         | IDF SUST prod		 {sprintf(tmp3,"T%d",t);quadr("-",$1,tmp4,tmp3);t++;}
+		| IDF '[' CONST_ENT ']' PLUS prod  {sprintf(tmp3,"T%d",t);sprintf(tmp10,"%s[%d]",$1,$3);quadr("+",tmp10,tmp4,tmp3);t++;}
+        | IDF '[' CONST_ENT ']' SUST prod	{sprintf(tmp3,"T%d",t);sprintf(tmp10,"%s[%d]",$1,$3);quadr("-",tmp10,tmp4,tmp3);t++;}
         | CONST_ENT SUST prod {sprintf(tmp3,"T%d",t);sprintf(tmp5,"%d",$1);quadr("-",tmp5,tmp4,tmp3);t++;}
         | CONST_REAL SUST prod {sprintf(tmp3,"T%d",t);sprintf(tmp5,"%f",$1);quadr("+",tmp5,tmp4,tmp3);t++;}
 		| IDF {sprintf(tmp4,"%s",$1);}
 		| CONST_ENT{sprintf(tmp4,"%d",$1);}
 		| CONST_REAL{sprintf(tmp4,"%f",$1)}
+		| IDF '[' CONST_ENT ']' {sprintf(tmp4,"%s[%d]",$1,$3);}
 		| prod
 ;
-prod: CONST_ENT MULT expres {sprintf(tmp3,"T%d",t);sprintf(tmp5,"%d",$1);quadr("+",tmp5,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
-		| CONST_REAL MULT expres {sprintf(tmp3,"T%d",t);sprintf(tmp5,"%f",$1);quadr("+",tmp5,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
-		| IDF MULT expres {sprintf(tmp3,"T%d",t);sprintf(tmp6,"T%d",t);quadr("*",$1,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
-        | IDF DIV expres		{sprintf(tmp3,"T%d",t);sprintf(tmp6,"%d",t);quadr("/",$1,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
-        | CONST_ENT DIV expres{sprintf(tmp3,"T%d",t);sprintf(tmp6,"%d",$1);quadr("/",tmp6,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
-        | CONST_REAL DIV expres{sprintf(tmp3,"T%d",t);sprintf(tmp6,"%f",$1);quadr("/",tmp6,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
+prod: CONST_ENT MULT expres {sprintf(tmp3,"T%d",t);sprintf(tmp5,"%d",$1);epic_quadr(op_count,"*",tmp5,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
+		| CONST_REAL MULT expres {sprintf(tmp3,"T%d",t);sprintf(tmp5,"%f",$1);epic_quadr(op_count,"*",tmp5,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
+		| IDF MULT expres {sprintf(tmp3,"T%d",t);sprintf(tmp6,"T%d",t);epic_quadr(op_count,"*",$1,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
+        | IDF DIV expres		{sprintf(tmp3,"T%d",t);sprintf(tmp6,"%d",t);epic_quadr(op_count,"/",$1,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
+		|  IDF '[' CONST_ENT ']' MULT expres {sprintf(tmp3,"T%d",t);sprintf(tmp6,"T%d",t);sprintf(tmp10,"%s[%d]",$1,$3);epic_quadr(op_count,"*",tmp10,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
+        |  IDF '[' CONST_ENT ']' DIV expres		{sprintf(tmp3,"T%d",t);sprintf(tmp6,"%d",t);sprintf(tmp10,"%s[%d]",$1,$3);epic_quadr(op_count,"/",tmp10,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
+        | CONST_ENT DIV expres{sprintf(tmp3,"T%d",t);sprintf(tmp6,"%d",$1);epic_quadr(op_count,"/",tmp6,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
+        | CONST_REAL DIV expres{sprintf(tmp3,"T%d",t);sprintf(tmp6,"%f",$1);epic_quadr(op_count,"/",tmp6,tmp4,tmp3);t++;strcpy(tmp4,tmp3);}
 		| IDF {sprintf(tmp4,"%s",$1);}
+		| IDF '[' CONST_ENT ']' {sprintf(tmp4,"%s[%d]",$1,$3);}
 		| CONST_ENT {sprintf(tmp4,"%d",$1);}
 		| CONST_REAL {sprintf(tmp4,"%f",$1);}
 	    | expres

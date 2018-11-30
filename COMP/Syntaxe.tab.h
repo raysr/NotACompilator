@@ -92,7 +92,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 42 "Syntaxe.y"
+#line 44 "Syntaxe.y"
 {
 int entier;
 float reel;
