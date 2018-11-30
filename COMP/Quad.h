@@ -131,7 +131,6 @@ void epic_quadr(int num,char opr[],char op1[],char op2[],char res[])
   while(i!=(taille-num+1))
   {
     q=depiler(&pileQuads);
-    
     strcpy(t,q1.op2);strcpy(q1.op2,q.op1);strcpy(q.op1,t);strcpy(t,q.res);strcpy(q.res,q1.res);strcpy(q1.res,t);
     empiler(&p,q);
     i=i+1;
@@ -150,7 +149,7 @@ void epic_quadr(int num,char opr[],char op1[],char op2[],char res[])
     qdr tmp=q1;
     taille=taille+1;
     i=0;
-    while(i!=(taille-num))
+    while(i!=(taille-num-1))
       {
     q=depiler(&p);
 /*            strcpy(t,tmp.op2);
@@ -159,9 +158,13 @@ void epic_quadr(int num,char opr[],char op1[],char op2[],char res[])
         strcpy(t,tmp.res);
     strcpy(tmp.res,q.res);
         strcpy(tmp.res,t);*/
+        tmp=q;
     empiler(&pileQuads,q);
     i++;
       }
+          q=depiler(&p);
+          strcpy(q.op1,tmp.res);
+              empiler(&pileQuads,q);
 }
 
 
