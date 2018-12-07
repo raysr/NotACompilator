@@ -135,7 +135,7 @@ INST_Plus: INST INST_Plus
 ;
 INST_Aff:
          IDF AFF expres ';' {sprintf(tmp2,"T%d",t-1),quadr(":=",tmp2,"",$1);t++;}
-		 |IDF AFF CONST_ENT ';'{sprintf(tmp2,"%d",t);quadr(":=",tmp2,"",$1);}
+		 |IDF AFF CONST_ENT ';'{sprintf(tmp2,"%d",$3);quadr(":=",tmp2,"",$1);}
 		 |IDF AFF IDF ';'		 {quadr(":=",$3,"",$1);}
 		 |IDF AFF CONST_REAL ';'{sprintf(tmp2,"%f",$3);quadr(":=",tmp2,"",$1);}
 		 |IDF '[' CONST_ENT ']' AFF expres ';'{sprintf(tmp2,"T%d",t-1);sprintf(tmp10,"%s[%d]",$1,$3);quadr(":=",tmp2,"",tmp10);}
