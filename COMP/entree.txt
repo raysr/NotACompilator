@@ -2,7 +2,9 @@ ALGORITHME test
 Integer p;
 Integer l||k||m ;
 Real n ||o;
-Integer T[5]|| N[7]; 
+Integer T[5]|| N[7];
 {
-k[4]:=m+l/k*m/T[4]*4+m;
+n:=1+ 2;
+n:=4*5*3*n;
+o:=n;
 }

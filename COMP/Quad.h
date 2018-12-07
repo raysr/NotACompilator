@@ -115,13 +115,12 @@ void quadr(char opr[],char op1[],char op2[],char res[])
 void epic_quadr(int num,char opr[],char op1[],char op2[],char res[])
 {
     if(num==taille+1){quadr(opr,op1,op2,res);return;}
-    
+
        qdr q1;
 	strcpy(q1.oper,opr);
 	strcpy(q1.op1,op1);
 	strcpy(q1.op2,op2);
 	strcpy(q1.res,res);
-
 
       int i=0;
   Pile *p;
@@ -136,7 +135,7 @@ void epic_quadr(int num,char opr[],char op1[],char op2[],char res[])
     i=i+1;
   }
 
-  
+
   /* if (colon_quad==1) strcpy(q.oper,val);
     else if (colon_quad==2) strcpy(q.op1,val);
     else if (colon_quad==3) strcpy(q.op2,val);
@@ -194,4 +193,203 @@ void ajour_quad(int num_quad, int colon_quad, char val [])
     empiler(&pileQuads,q);
     i++;
       }
+}
+
+// ============================================================================
+// ================================ OPTIMISATION ==============================
+// ============================================================================
+
+
+char optimises[1000][100];
+int nbr_optimises=0;
+int recherche_si_optimise(char c [])
+{
+  int i=0;
+  for(i=0;i<nbr_optimises;i++)
+  {
+    if(strcmp(c,optimises[i])==0){return 1;}
+  }
+  return 0;
+}
+void ajout_optimises(char c [])
+{
+  strcpy(optimises[nbr_optimises],c);
+  nbr_optimises++;
+}
+int verif_const(char entr [], int n)
+{
+  int i=0;
+  while(i<n && entr[i]!='\0')
+  {
+    if(entr[i]!='0' && entr[i]!='1' && entr[i]!='2' && entr[i]!='3' && entr[i]!='4' && entr[i]!='5' && entr[i]!='6' && entr[i]!='7' && entr[i]!='8' && entr[i]!='9')
+    {
+      return 1;
+    }
+    i++;
+  }
+  return 0;
+}
+
+int verif_temporaire(char entr [], int n)
+{
+  int i=0;
+  if(entr[i]!='T'){return 0;}
+  else{i++;}
+  while(i<n && entr[i]!='\0')
+  {
+    if(entr[i]=='0' || entr[i]=='1' || entr[i]=='2' || entr[i]=='3' || entr[i]=='4' || entr[i]=='5' || entr[i]=='6' || entr[i]=='7' || entr[i]=='8' || entr[i]=='9')
+    {
+i++;
+    }
+    else{return 0;}
+
+  }
+  return 1;
+}
+
+int propagation_copie()
+{
+  int value=0;
+  printf("Propagation de copie\n");
+  int i=0;
+  Pile *p;
+  Element *e;
+  char tmp[100],tr[100];
+    qdr q;
+    int test=0;
+  while(i!=taille)
+  {
+    q=depiler(&pileQuads);
+    empiler(&p,q);
+    i=i+1;
+  }
+
+    i=0;
+    int test2=0;
+    while(i<(taille) && test==0)
+      {
+
+    q=depiler(&p);
+    if(recherche_si_optimise(q.res)==0 && strcmp(q.oper,":=")==0 && strcmp(q.op1,"")!=0 && strcmp(q.op2,"")==0)
+    {
+ afficherQuad(q);strcpy(tmp,q.op1);test=1;strcpy(tr,q.res);printf("TMP : %s TR : %s \n",tmp,tr);ajout_optimises(q.res);
+    }
+    empiler(&pileQuads,q);
+    i++;
+      }
+      while(i<(taille))
+        {
+
+      q=depiler(&p);
+      if(strcmp(q.res,tr)==0){test2=1;printf("Re-usage.\n");}
+      if(test2==0){
+      if(strcmp(q.op1,tr)==0 && strcmp(q.op1,tmp)!=0) {strcpy(q.op1,tmp);printf("To replace\n");value=1;}
+        if(strcmp(q.op2,tr)==0 && strcmp(q.op2,tmp)!=0) {strcpy(q.op2,tmp);printf("To replace\n");value=1;}
+        }
+      empiler(&pileQuads,q);
+      i++;
+        }
+      return value;
+}
+
+
+
+int propagation_expressions()
+{
+  int value=0;
+    printf("Propagation d'expression\n");
+    int i=0;
+    Pile *p;
+    Element *e;
+    char tmp[100],tr[100];
+      qdr q;
+      int test=0;
+    while(i!=taille)
+    {
+      q=depiler(&pileQuads);
+      empiler(&p,q);
+      i=i+1;
+    }
+
+      i=0;
+      int test2=0;
+      while(i<(taille) && test==0)
+        {
+
+      q=depiler(&p);
+      if(recherche_si_optimise(q.op1)==0 && strcmp(q.oper,":=")==0 && strcmp(q.op1,"")!=0 && verif_temporaire(q.op1,100)==1 && strcmp(q.op2,"")==0)
+      {
+   afficherQuad(q);strcpy(tmp,q.op1);test=1;strcpy(tr,q.res);printf("TEMPORAIRE AFFECTE tmp:%s | tr:%s\n",tmp,tr);ajout_optimises(q.op1);
+      }
+      empiler(&pileQuads,q);
+      i++;
+        }
+        while(i<(taille))
+          {
+        q=depiler(&p);
+        if(strcmp(q.res,tr)==0){test2=1;}
+        if(test2==0){
+        if(strcmp(q.op1,tr)==0 && strcmp(q.op1,tmp)!=0) {strcpy(q.op1,tmp);afficherQuad(q);printf("FOUND q.op1:%s | tr:%s\n",q.op1,tr);value=1;}
+          if(strcmp(q.op2,tr)==0 && strcmp(q.op2,tmp)!=0) {strcpy(q.op2,tmp);afficherQuad(q);printf("FOUND q.op2:%s | tr:%s\n",q.op2,tr);value=1;}
+          }
+        empiler(&pileQuads,q);
+        i++;
+          }
+  return value;
+}
+
+
+
+
+
+int elimination_expressions_redondantes()
+{
+  // TO BE DONE
+    printf("Elimination d'expressions redondantes\n");
+    return 0;
+}
+
+
+
+
+
+int elimination_expressions_inutiles()
+{
+    printf("Elimination d'expression inutiles\n");
+  char affectes[1000][100];
+  int affectes_indices[1000];
+  int nbr_affectes=0;
+  Element *actuel = pileQuads.premier;
+  int i=0;
+  while (actuel != NULL)
+  {
+      if(strcmp(actuel->quad.oper,":=")==0){strcpy(affectes[nbr_affectes],actuel->quad.res);affectes_indices[nbr_affectes]=i;nbr_affectes++;}
+      actuel = actuel->suivant;
+      i=i+1;
+  }
+  int j;
+  while (actuel != NULL)
+  {
+      for(j=0;j<nbr_affectes;j++){if(strcmp(affectes[j],actuel->quad.op1)==0 || strcmp(affectes[j],actuel->quad.op2)==0){printf("Used : %s\n",affectes[j]);strcpy(affectes[j],'\0');}}
+      actuel = actuel->suivant;
+      i=i+1;
+  }
+      printf(" Non utilises : %d \n",nbr_affectes);
+  for(j=0;j<nbr_affectes;j++){
+    if(1==1)
+    {
+      printf(": %s\n",affectes[j]);
+    }
+  }
+
+  return 0;
+}
+
+
+void optimisation()
+{
+  int test=1;
+  printf("/ Optimisation en cours \\ \n");
+  while(test!=0) test=propagation_copie()+propagation_expressions()+elimination_expressions_inutiles();elimination_expressions_redondantes();
+  afficherQuadruplets(&pileQuads);
 }

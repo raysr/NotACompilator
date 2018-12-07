@@ -19,7 +19,7 @@ enum { false, true };
 extern void insereTaille(char nom[], int taille);
 extern int doubleDeclaration (char nom[]);
 extern void insereType(char nom[],char type[]);
-extern void yyerror(char *s); 
+extern void yyerror(char *s);
 int prems=0;
 char sauvOper[20] ;
 char sauvType[20];
@@ -46,7 +46,7 @@ int entier;
 float reel;
 char* str;
 char car;
-   } 
+   }
 %token mc_Algo mc_Deb mc_If mc_Execut mc_while mc_CONST bibl_tab bibl_boucle bibl_calcul SEP '{' '}' <str>mc_INT <str>mc_REAL <str>IDF OPREL AFF PLUS SUST MULT DIV '(' ')' ';' '[' ']' '+' '-' <entier>CONST_ENT <reel>CONST_REAL <str>String
 
 %%
@@ -58,20 +58,20 @@ BIBL:                       bibl_tab BIBL
                            |bibl_calcul BIBL
 	                       |
 ;
-IDF_Plus: IDF SEP IDF_Plus { 
+IDF_Plus: IDF SEP IDF_Plus {
                           if ( doubleDeclaration($1)==1){insereType($1,sauvType);insereTaille($1,1);}
                           else {printf("\nErreur Sémantique: double declation de %s, a la ligne %d\n", $1, nbrligne);}}
-          |IDF {             
+          |IDF {
 		                  if ( doubleDeclaration($1)==1){insereType($1,sauvType);insereTaille($1,1);}
                           else {printf("\nErreur Sémantique: double declation de %s, a la ligne %d\n", $1, nbrligne);}}
 
 ;
-DEC_Simp:TYPE IDF_Plus ';' 
+DEC_Simp:TYPE IDF_Plus ';'
 ;
 
-IDF_Plus_Tab:IDF '[' CONST_ENT ']' SEP IDF_Plus_Tab 
+IDF_Plus_Tab:IDF '[' CONST_ENT ']' SEP IDF_Plus_Tab
                  {
-	    
+
 			     if($3 <=0){printf("\nErreur Semantique: taille de %s est negative ou nulle , a la ligne %d\n", $1, nbrligne);}
 				 else{ insereTaille($1,$3);}
 			    if ( doubleDeclaration($1)==1){insereType($1,sauvType);sprintf(tmp10,"L%d",l);sprintf(tmp9,"%d",$3);quadr("BOUNDS",tmp10,tmp9,"");quadr("ADEC",$1,"","");
@@ -79,7 +79,7 @@ IDF_Plus_Tab:IDF '[' CONST_ENT ']' SEP IDF_Plus_Tab
 						 }
           | IDF '[' CONST_ENT ']'
 		  {
-	    
+
 			     if($3 <=0){printf("\nErreur Semantique: taille de %s est negative ou nulle , a la ligne %d\n", $1, nbrligne);}
 				 else{ insereTaille($1,$3);}
 			    if ( doubleDeclaration($1)==1){insereType($1,sauvType);insereType($1,sauvType);sprintf(tmp10,"L%d",l);sprintf(tmp9,"%d",$3);quadr("BOUNDS",tmp10,tmp9,"");quadr("ADEC",$1,"","");
@@ -96,11 +96,11 @@ DEC: DEC_Simp DEC
 // ------------------- Boucle ------------------
 INST_Boucle:  mc_while'(' C COND_WHILE ')'
              '{'
-             INST_Plus 
-             '}'		
+             INST_Plus
+             '}'
 			 D
             { if(found("#BOUCLE")!=-1){printf("\nErreur Semantique: la bibliotheque Tab est manquante , a la ligne %d.\n", nbrligne);}
-				}			 
+				}
 ;
 C: {addr_while[dixit_while]=taille+1;dixit_while++;}
 ;
@@ -112,8 +112,8 @@ COND_WHILE:IDF OPREL IDF   {if(strcmp($2,"==")==0){strcpy(tmp,"BNE");}if (strcmp
 ;
 // ------------------- Condition ------------------
 INST_Cond: mc_Execut A
-           INST_Plus 
-		   mc_If '(' COND_IF ')' B   
+           INST_Plus
+		   mc_If '(' COND_IF ')' B
 ;
 A: {quadr("BR","","","");addr_if[dixit_if]=taille+1;dixit_if++;}
 ;
@@ -126,11 +126,11 @@ COND_IF: IDF OPREL IDF   {if(strcmp($2,"==")==0){strcpy(tmp,"BE");}if (strcmp($2
 
 
 // ------------------- Instruction ------------------
-INST: EPIC INST_Aff 
+INST: EPIC INST_Aff
      | INST_Cond
-	 | INST_Boucle 
+	 | INST_Boucle
 ;
-INST_Plus: INST INST_Plus 
+INST_Plus: INST INST_Plus
           |INST
 ;
 INST_Aff:
@@ -177,9 +177,9 @@ operateur:PLUS {strcpy(sauvOper,$1);}
          |SUST {strcpy(sauvOper,$1);}
          |MULT {strcpy(sauvOper,$1);}
          |DIV  {strcpy(sauvOper,$1);}
-;		 
-TYPE:mc_INT     {strcpy(sauvType,$1);}  
-    |mc_REAL    {strcpy(sauvType,$1);} 
+;
+TYPE:mc_INT     {strcpy(sauvType,$1);}
+    |mc_REAL    {strcpy(sauvType,$1);}
 ;
 CONST: CONST_ENT {strcpy(type,"Integer");}
 		   | CONST_REAL {strcpy(type,"Real");}
@@ -203,13 +203,9 @@ int main()
 				ajour_quad(2,2,"CHANGED SUCCESSFULLY");*/
 
  afficherQuadruplets(&pileQuads);
+ optimisation();
 
 }
 
 yywrap()
 {}
-
-
-
-
-
